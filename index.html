@@ -1,123 +1,48 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const sections = document.querySelectorAll('.section');
-    const dynamicH2 = document.getElementById('dynamic-h2');
-    const dynamicSubmenu = document.getElementById('dynamic-submenu');
-    const heroSection = document.getElementById('hero-section');
-    const menuButton = document.getElementById('menu-button');
-    const collapsibleMenu = document.getElementById('collapsible-menu');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Compromise Forensic Investigation</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="hero" id="hero-section">
+        <div class="hero-content">
+            <h1>🔍 Host Compromise Investigation</h1>
+            <div class="dynamic-content">
+                <h2 id="dynamic-h2"></h2>
+                <div class="sticky-submenu" id="dynamic-submenu"></div>
+            </div>
+            <button class="menu-button" id="menu-button">☰</button>
+        </div>
+    </div>
 
-    // Generate navigation items for the sidebar
-    sections.forEach(section => {
-        const id = section.id;
-        let title = '';
-        const h2 = section.querySelector('h2');
-        if (h2) {
-            title = h2.textContent.replace(/[📋💻⏱️🦠🕵️🔬🛡️🎓🚀📚✅]/g, '').trim();
-        }
+    <nav class="collapsible-menu" id="collapsible-menu">
+        <!-- Navigation items will be added here dynamically -->
+    </nav>
 
-        if (title) {
-            const navItem = document.createElement('a');
-            navItem.href = `#${id}`;
-            navItem.classList.add('spa-nav-item');
-            navItem.textContent = title;
-            spaNav.appendChild(navItem);
+    <div class="main-content">
+        <!-- Your sections will go here -->
+        <section class="section" id="executive-summary">
+            <h2>📋 Executive Summary</h2>
+            <div class="sticky-submenu">
+                <a href="#initial-compromise" class="sticky-submenu-item">Initial Compromise</a>
+                <a href="#privilege-escalation" class="sticky-submenu-item">Privilege Escalation</a>
+                <!-- Add more submenu items as needed -->
+            </div>
+            <div class="info-grid">
+                <!-- Your content here -->
+            </div>
+        </section>
+        <!-- Add more sections as needed -->
+    </div>
 
-            navItem.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-                history.pushState(null, '', `#${id}`);
-            });
-        }
-    });
+    <nav class="spa-nav">
+        <!-- SPA navigation items will be added here dynamically -->
+    </nav>
 
-    // Toggle collapsible menu
-    menuButton.addEventListener('click', () => {
-        collapsibleMenu.style.display = collapsibleMenu.style.display === 'flex' ? 'none' : 'flex';
-    });
-
-    // Close collapsible menu when a link is clicked
-    collapsibleMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            collapsibleMenu.style.display = 'none';
-        });
-    });
-
-    // Intersection Observer for fade-in effect and active navigation
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.2
-    };
-
-    const sectionObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-                const h2 = entry.target.querySelector('h2');
-                if (h2) {
-                    dynamicH2.textContent = h2.textContent;
-                }
-
-                // Update submenu
-                const submenu = entry.target.querySelector('.sticky-submenu');
-                if (submenu) {
-                    dynamicSubmenu.innerHTML = submenu.innerHTML;
-                }
-
-                // Update active navigation item
-                document.querySelectorAll('.spa-nav-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.getAttribute('href') === `#${entry.target.id}`) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-        });
-    }, observerOptions);
-
-    sections.forEach(section => {
-        sectionObserver.observe(section);
-    });
-
-    // Hero section sticky effect
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 0) {
-            heroSection.classList.add('scrolled');
-        } else {
-            heroSection.classList.remove('scrolled');
-        }
-    });
-
-    // Handle initial hash in URL for direct linking
-    if (window.location.hash) {
-        const targetSection = document.getElementById(window.location.hash.substring(1));
-        if (targetSection) {
-            setTimeout(() => {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
-    }
-
-    // Sticky submenu highlighting
-    const submenuItems = document.querySelectorAll('.sticky-submenu-item');
-    const submenuSections = document.querySelectorAll('.info-card, .timeline-item, .remediation-card, h3');
-
-    const submenuObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                submenuItems.forEach(item => {
-                    item.classList.remove('active');
-                    if (item.getAttribute('href') === `#${id}`) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-        });
-    }, { threshold: 0.5 });
-
-    submenuSections.forEach(section => {
-        submenuObserver.observe(section);
-    });
-});
+    <script src="scripts/script.js"></script>
+</body>
+</html>
 
