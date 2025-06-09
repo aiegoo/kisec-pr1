@@ -43,6 +43,9 @@
             padding: 0 20px; /* Adjust padding as hero already has vertical padding */
             text-align: center;
             transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .hero.scrolled .hero-content {
@@ -77,6 +80,72 @@
             font-size: clamp(0.9rem, 1.5vw, 1.2rem);
             color: #96ceb4;
             opacity: 0.9;
+        }
+
+        /* Menu Button */
+        .menu-button {
+            display: none; /* Hidden by default */
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 101;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu.scrolled {
+            display: none; /* Hide the full menu when scrolled */
+        }
+
+        .nav-menu-item {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Collapsible Menu */
+        .collapsible-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 15, 35, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            display: none; /* Hidden by default */
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .collapsible-menu-item {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin: 5px 0;
+        }
+
+        .collapsible-menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* General Section Styling */
@@ -374,6 +443,14 @@
                 flex-grow: 1;
                 margin: 5px;
             }
+
+            .menu-button {
+                display: block; /* Show menu button on small screens */
+            }
+
+            .nav-menu {
+                display: none; /* Hide full menu on small screens */
+            }
         }
     </style>
 </head>
@@ -381,24 +458,36 @@
     <div class="hero" id="hero-section">
         <div class="hero-content">
             <h1>🔍 Host Compromise Investigation</h1>
-            <div class="subtitle">Complete Forensic Analysis & Remediation</div>
-            <div class="date">Ubuntu 24.04.2 LTS | May-June 2025</div>
-            <div class="info-grid" style="margin-top: 40px;">
-                <div class="info-card">
-                    <h3>🎯 Target System</h3>
-                    <p>Aiegoo_Ubuntu_Device</p>
-                </div>
-                <div class="info-card">
-                    <h3>🕐 Discovery Date</h3>
-                    <p>May 6, 2025 09:20</p>
-                </div>
-                <div class="info-card">
-                    <h3>🦠 Threats Identified</h3>
-                    <p>Mumblehard + BPFDoor</p>
-                </div>
-            </div>
+            <button class="menu-button" id="menu-button">☰</button>
+            <nav class="nav-menu" id="nav-menu">
+                <a href="#executive-summary" class="nav-menu-item">Executive Summary</a>
+                <a href="#system-info" class="nav-menu-item">System Info</a>
+                <a href="#attack-timeline" class="nav-menu-item">Attack Timeline</a>
+                <a href="#malware-analysis" class="nav-menu-item">Malware Analysis</a>
+                <a href="#bpfdoor-analysis" class="nav-menu-item">BPFDoor Analysis</a>
+                <a href="#forensic-methodology" class="nav-menu-item">Forensic Methodology</a>
+                <a href="#remediation-overview" class="nav-menu-item">Remediation</a>
+                <a href="#lessons-learned" class="nav-menu-item">Lessons Learned</a>
+                <a href="#future-recommendations" class="nav-menu-item">Recommendations</a>
+                <a href="#project-references" class="nav-menu-item">References</a>
+                <a href="#conclusion" class="nav-menu-item">Conclusion</a>
+            </nav>
         </div>
     </div>
+
+    <nav class="collapsible-menu" id="collapsible-menu">
+        <a href="#executive-summary" class="collapsible-menu-item">Executive Summary</a>
+        <a href="#system-info" class="collapsible-menu-item">System Info</a>
+        <a href="#attack-timeline" class="collapsible-menu-item">Attack Timeline</a>
+        <a href="#malware-analysis" class="collapsible-menu-item">Malware Analysis</a>
+        <a href="#bpfdoor-analysis" class="collapsible-menu-item">BPFDoor Analysis</a>
+        <a href="#forensic-methodology" class="collapsible-menu-item">Forensic Methodology</a>
+        <a href="#remediation-overview" class="collapsible-menu-item">Remediation</a>
+        <a href="#lessons-learned" class="collapsible-menu-item">Lessons Learned</a>
+        <a href="#future-recommendations" class="collapsible-menu-item">Recommendations</a>
+        <a href="#project-references" class="collapsible-menu-item">References</a>
+        <a href="#conclusion" class="collapsible-menu-item">Conclusion</a>
+    </nav>
 
     <div class="main-content">
         <section class="section" id="executive-summary">
@@ -447,7 +536,7 @@
                     <div>CVEs Identified</div>
                 </div>
             </div>
-            
+
             <h3>🔍 Key CVEs Involved</h3>
             <div class="info-grid">
                 <div class="info-card">
@@ -784,7 +873,7 @@
         <section class="section" id="conclusion">
             <h2>✅ Investigation Complete</h2>
             <div class="subtitle">System Secured & Hardened</div>
-            
+
             <div class="stats-grid" style="margin-top: 40px;">
                 <div class="stat-card">
                     <span class="stat-number">100%</span>
@@ -812,13 +901,16 @@
     </div>
 
     <nav class="spa-nav">
-        </nav>
+    </nav>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sections = document.querySelectorAll('.section');
             const spaNav = document.querySelector('.spa-nav');
             const heroSection = document.getElementById('hero-section');
+            const menuButton = document.getElementById('menu-button');
+            const navMenu = document.getElementById('nav-menu');
+            const collapsibleMenu = document.getElementById('collapsible-menu');
 
             // Generate navigation items
             sections.forEach(section => {
@@ -846,6 +938,18 @@
                         history.pushState(null, '', `#${id}`); // Update URL hash
                     });
                 }
+            });
+
+            // Toggle collapsible menu
+            menuButton.addEventListener('click', () => {
+                collapsibleMenu.style.display = collapsibleMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            // Close collapsible menu when a link is clicked
+            collapsibleMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    collapsibleMenu.style.display = 'none';
+                });
             });
 
             // Intersection Observer for fade-in effect and active navigation
@@ -881,8 +985,10 @@
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 0) {
                     heroSection.classList.add('scrolled');
+                    navMenu.classList.add('scrolled');
                 } else {
                     heroSection.classList.remove('scrolled');
+                    navMenu.classList.remove('scrolled');
                 }
             });
 
@@ -899,3 +1005,4 @@
     </script>
 </body>
 </html>
+
