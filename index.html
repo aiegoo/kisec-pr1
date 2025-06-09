@@ -281,34 +281,34 @@
 
     <main class="main-content">
         <section id="overview">
-            <h2>Overview of Investigation</h2>
+            <h2><a href="#overview">Overview of Investigation</a></h2>
             <p>This section provides a high-level overview of the host compromise investigation. It covers the initial alert, the scope of the incident, and the primary objectives of the forensic analysis. Our aim is to determine the extent of the breach, identify the attack vectors, and ensure complete remediation to prevent future incidents. The timeline of the investigation, from initial detection to the current status, is also detailed here. This incident involved a critical Ubuntu server, 'Aiegoo_Ubuntu_Device', which was flagged on May 6, 2025, at 09:20 KST.</p>
             <p>Initial findings suggest the presence of sophisticated malware, specifically 'Mumblehard' and 'BPFDoor', indicating a targeted and persistent threat. The investigation leverages advanced forensic tools and techniques to reconstruct the attack chain and pinpoint vulnerabilities. Our team is working diligently to minimize downtime and restore the system's integrity while collecting crucial evidence for post-mortem analysis.</p>
         </section>
 
         <section id="initial-findings">
-            <h2>Initial Findings</h2>
+            <h2><a href="#initial-findings">Initial Findings</a></h2>
             <p>Upon initial triage, several critical anomalies were identified on 'Aiegoo_Ubuntu_Device'. Logs showed unusual outbound network connections to known command-and-control (C2) servers. Processes not typically associated with the server's function were running with elevated privileges. File integrity monitoring detected unauthorized modifications to system binaries and configuration files, particularly within `/etc` and `/usr/bin` directories.</p>
             <p>The presence of 'Mumblehard' was confirmed through memory forensics, revealing its sophisticated backdoor capabilities and extensive use of system resources for cryptocurrency mining and spam distribution. 'BPFDoor' was identified as a backdoor leveraging Berkeley Packet Filter (BPF) for stealthy network communication, making it difficult to detect with traditional firewalls. Evidence points to the adversaries maintaining persistence through multiple mechanisms, including cron jobs and modified systemd services.</p>
             <p>Disk images were immediately taken for offline analysis to preserve evidence. Preliminary analysis indicates data exfiltration attempts and potential lateral movement within the network, which are under active investigation.</p>
         </section>
 
         <section id="attack-vectors">
-            <h2>Identified Attack Vectors</h2>
+            <h2><a href="#attack-vectors">Identified Attack Vectors</a></h2>
             <p>The primary attack vector appears to be an exploited vulnerability in an outdated public-facing service running on the Ubuntu server. Specifically, analysis of web server logs and network traffic points to a successful exploitation of CVE-2024-XXXX, a critical vulnerability in [Specific Service Name/Version, e.g., Apache Struts] that allowed for remote code execution (RCE). This initial breach likely provided the foothold for the attackers.</p>
             <p>Following the RCE, the attackers utilized a privilege escalation exploit (e.g., a kernel vulnerability or misconfigured SUID binary) to gain root access. This enabled them to deploy the 'Mumblehard' and 'BPFDoor' malware. Further investigation is ongoing to identify if phishing, supply chain compromise, or weak credentials played any role in facilitating the initial access or subsequent lateral movement.</p>
             <p>The adversaries demonstrated a strong understanding of Linux environments, using stealthy techniques to evade detection, including clearing command history, manipulating log files, and using legitimate system utilities for malicious purposes.</p>
         </section>
 
         <section id="remediation-steps">
-            <h2>Remediation Steps Taken</h2>
+            <h2><a href="#remediation-steps">Remediation Steps Taken</a></h2>
             <p>Immediate containment measures were implemented: the compromised server was isolated from the network, and all suspicious processes were terminated. A full system shutdown and forensic imaging were performed to ensure no further malicious activity. All known backdoors and persistence mechanisms, including 'Mumblehard' and 'BPFDoor' components, cron jobs, and modified systemd units, were identified and removed.</p>
             <p>The compromised service was patched or removed, and all system packages were updated to their latest versions. All user accounts and SSH keys were reviewed, and compromised credentials were reset. Stronger password policies and multi-factor authentication (MFA) were enforced across all critical systems. A thorough malware scan using multiple engines confirmed the absence of known malicious payloads.</p>
             <p>Configuration hardening was applied, including tightening firewall rules, implementing SELinux/AppArmor policies, and disabling unnecessary services. Network segmentation was reviewed and enhanced to limit potential lateral movement in the future.</p>
         </section>
 
         <section id="post-remediation">
-            <h2>Post-Remediation Activities</h2>
+            <h2><a href="#post-remediation">Post-Remediation Activities</a></h2>
             <p>Following the active remediation, several post-remediation activities are underway to ensure the long-term security and resilience of the 'Aiegoo_Ubuntu_Device' and the wider network. Continuous monitoring has been established, leveraging enhanced SIEM rules and endpoint detection and response (EDR) solutions to detect any anomalous behavior proactively. Regular vulnerability scanning and penetration testing will be conducted to identify and address potential weaknesses before they can be exploited.</p>
             <p>An incident response plan review and update are in progress, incorporating lessons learned from this compromise. Security awareness training for all personnel will be reinforced, with a focus on identifying social engineering tactics and phishing attempts. Automated patching and configuration management systems are being implemented to ensure consistent security posture across all infrastructure. The goal is to build a more robust and resilient security architecture against future cyber threats.</p>
         </section>
