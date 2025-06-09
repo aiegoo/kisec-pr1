@@ -95,30 +95,6 @@
             z-index: 101;
         }
 
-        /* Navigation Menu */
-        .nav-menu {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-menu.scrolled {
-            display: none; /* Hide the full menu when scrolled */
-        }
-
-        .nav-menu-item {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-menu-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         /* Collapsible Menu */
         .collapsible-menu {
             position: fixed;
@@ -447,10 +423,6 @@
             .menu-button {
                 display: block; /* Show menu button on small screens */
             }
-
-            .nav-menu {
-                display: none; /* Hide full menu on small screens */
-            }
         }
     </style>
 </head>
@@ -459,19 +431,6 @@
         <div class="hero-content">
             <h1>🔍 Host Compromise Investigation</h1>
             <button class="menu-button" id="menu-button">☰</button>
-            <nav class="nav-menu" id="nav-menu">
-                <a href="#executive-summary" class="nav-menu-item">Executive Summary</a>
-                <a href="#system-info" class="nav-menu-item">System Info</a>
-                <a href="#attack-timeline" class="nav-menu-item">Attack Timeline</a>
-                <a href="#malware-analysis" class="nav-menu-item">Malware Analysis</a>
-                <a href="#bpfdoor-analysis" class="nav-menu-item">BPFDoor Analysis</a>
-                <a href="#forensic-methodology" class="nav-menu-item">Forensic Methodology</a>
-                <a href="#remediation-overview" class="nav-menu-item">Remediation</a>
-                <a href="#lessons-learned" class="nav-menu-item">Lessons Learned</a>
-                <a href="#future-recommendations" class="nav-menu-item">Recommendations</a>
-                <a href="#project-references" class="nav-menu-item">References</a>
-                <a href="#conclusion" class="nav-menu-item">Conclusion</a>
-            </nav>
         </div>
     </div>
 
@@ -909,10 +868,9 @@
             const spaNav = document.querySelector('.spa-nav');
             const heroSection = document.getElementById('hero-section');
             const menuButton = document.getElementById('menu-button');
-            const navMenu = document.getElementById('nav-menu');
             const collapsibleMenu = document.getElementById('collapsible-menu');
 
-            // Generate navigation items
+            // Generate navigation items for the sidebar
             sections.forEach(section => {
                 const id = section.id;
                 let title = '';
@@ -985,10 +943,8 @@
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 0) {
                     heroSection.classList.add('scrolled');
-                    navMenu.classList.add('scrolled');
                 } else {
                     heroSection.classList.remove('scrolled');
-                    navMenu.classList.remove('scrolled');
                 }
             });
 
