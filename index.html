@@ -458,7 +458,10 @@
 <body>
     <div class="hero" id="hero-section">
         <div class="hero-content">
-            <h1>🔍 Host Compromise Investigation</h1>
+            <div>
+                <h1>🔍 Host Compromise Investigation</h1>
+                <div class="hero-section-title subtitle" id="hero-section-title"></div>
+            </div>
             <button class="menu-button" id="menu-button">☰</button>
         </div>
     </div>
@@ -961,6 +964,7 @@
             const heroSection = document.getElementById('hero-section');
             const menuButton = document.getElementById('menu-button');
             const collapsibleMenu = document.getElementById('collapsible-menu');
+            const heroSectionTitle = document.getElementById('hero-section-title');
 
             // Generate navigation items for the sidebar
             sections.forEach(section => {
@@ -1004,9 +1008,9 @@
 
             // Intersection Observer for fade-in effect and active navigation
             const observerOptions = {
-                root: null, // viewport
+                root: null,
                 rootMargin: '0px',
-                threshold: 0.2 // Trigger when 20% of the section is visible
+                threshold: 0.2
             };
 
             const sectionObserver = new IntersectionObserver((entries, observer) => {
@@ -1020,9 +1024,11 @@
                                 item.classList.add('active');
                             }
                         });
-                    } else {
-                        // Optional: remove fade-in when out of view, or keep it for single view
-                        // entry.target.classList.remove('fade-in');
+                        // Set hero subtitle to current section's h2
+                        const h2 = entry.target.querySelector('h2');
+                        if (h2) {
+                            heroSectionTitle.textContent = h2.textContent;
+                        }
                     }
                 });
             }, observerOptions);
