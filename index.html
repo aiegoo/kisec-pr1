@@ -984,8 +984,15 @@
 
                     navItem.addEventListener('click', (e) => {
                         e.preventDefault();
-                        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-                        history.pushState(null, '', `#${id}`); // Update URL hash
+                        const sectionEl = document.getElementById(id);
+                        const hero = document.getElementById('hero-section');
+                        const heroHeight = hero ? hero.offsetHeight : 0;
+                        const sectionTop = sectionEl.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                            top: sectionTop - heroHeight - 8, // 8px extra for spacing
+                            behavior: 'smooth'
+                        });
+                        history.pushState(null, '', `#${id}`);
                     });
                 }
             });
@@ -1044,8 +1051,14 @@
             if (window.location.hash) {
                 const targetSection = document.getElementById(window.location.hash.substring(1));
                 if (targetSection) {
-                    setTimeout(() => { // Small delay to ensure layout is ready
-                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => {
+                        const hero = document.getElementById('hero-section');
+                        const heroHeight = hero ? hero.offsetHeight : 0;
+                        const sectionTop = targetSection.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                            top: sectionTop - heroHeight - 8,
+                            behavior: 'smooth'
+                        });
                     }, 100);
                 }
             }
