@@ -1063,27 +1063,70 @@
                 }
             }
 
-            // Sticky submenu highlighting
-            const submenuItems = document.querySelectorAll('.sticky-submenu-item');
-            const submenuSections = document.querySelectorAll('.info-card, .timeline-item, .remediation-card, h3');
+            // --- Sticky Submenu Highlighting (Snap-to-Section) ---
+            // For each sticky submenu, highlight only one item at a time as you scroll.
+            document.querySelectorAll('.sticky-submenu').forEach(submenu => {
+                const submenuItems = submenu.querySelectorAll('.sticky-submenu-item');
+                if (!submenuItems.length) return;
 
-            const submenuObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.id;
-                        submenuItems.forEach(item => {
-                            item.classList.remove('active');
-                            if (item.getAttribute('href') === `#${id}`) {
-                                item.classList.add('active');
-                            }
-                        });
-                    }
+                // Map submenu items to their target elements
+                const targets = Array.from(submenuItems).map(item => {
+                    const hash = item.getAttribute('href');
+                    if (!hash) return null;
+                    // Try to find a matching element by id
+                    return document.querySelector(hash);
                 });
-            }, { threshold: 0.5 });
 
-            submenuSections.forEach(section => {
-                submenuObserver.observe(section);
+                // Listen to scroll and highlight the closest section in view
+                function highlightClosest() {
+                    // Get the scroll position relative to the viewport
+                    const scrollY = window.scrollY || window.pageYOffset;
+                    // Offset for sticky headers (hero + submenu)
+                    const offset = (document.getElementById('hero-section')?.offsetHeight || 0)
+                        + (submenu.offsetHeight || 0) + 12;
+
+                    // Find the target whose top is closest but not greater than scrollY+offset
+                    let closestIdx = 0;
+                    let minDist = Infinity;
+                    targets.forEach((el, idx) => {
+                        if (!el) return;
+                        const rect = el.getBoundingClientRect();
+                        // Distance from top of viewport minus offset
+                        const dist = Math.abs(rect.top - offset);
+                        // Only consider sections above or near the top
+                        if (rect.top - offset <= 10 && dist < minDist) {
+                            minDist = dist;
+                            closestIdx = idx;
+                        }
+                    });
+
+                    // Remove all active, then set only the closest as active
+                    submenuItems.forEach((item, idx) => {
+                        if (idx === closestIdx) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
+
+                // Initial highlight
+                highlightClosest();
+                // On scroll and resize
+                window.addEventListener('scroll', highlightClosest, { passive: true });
+                window.addEventListener('resize', highlightClosest);
+
+                // Also highlight on click (for smooth scroll)
+                submenuItems.forEach((item, idx) => {
+                    item.addEventListener('click', () => {
+                        // Remove all, set clicked as active
+                        submenuItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                    });
+                });
             });
+
+            // ...existing code for fade-in, hero sticky, etc...
         });
     </script>
 </body>
