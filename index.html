@@ -403,6 +403,19 @@
             box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
         }
 
+        /* Slimmer sidebar menu styles */
+        .collapsible-menu,
+        .spa-nav {
+            padding: 6px 0 !important;
+            gap: 0 !important;
+        }
+        .collapsible-menu-item,
+        .spa-nav-item {
+            padding: 6px 10px !important;
+            font-size: 0.95rem !important;
+            margin: 2px 0 !important;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .section {
@@ -464,15 +477,15 @@
     </div>
 
     <nav class="collapsible-menu" id="collapsible-menu">
-        <a href="#executive-summary" class="collapsible-menu-item">Executive Summary</a>
-        <a href="#system-info" class="collapsible-menu-item">System Info</a>
-        <a href="#attack-timeline" class="collapsible-menu-item">Attack Timeline</a>
-        <a href="#malware-analysis" class="collapsible-menu-item">Malware Analysis</a>
-        <a href="#bpfdoor-analysis" class="collapsible-menu-item">BPFDoor Analysis</a>
-        <a href="#forensic-methodology" class="collapsible-menu-item">Forensic Methodology</a>
+        <a href="#executive-summary" class="collapsible-menu-item">Summary</a>
+        <a href="#system-info" class="collapsible-menu-item">System Details</a>
+        <a href="#attack-timeline" class="collapsible-menu-item">Timeline</a>
+        <a href="#malware-analysis" class="collapsible-menu-item">Malware</a>
+        <a href="#bpfdoor-analysis" class="collapsible-menu-item">BPFDoor</a>
+        <a href="#forensic-methodology" class="collapsible-menu-item">Methodology</a>
         <a href="#remediation-overview" class="collapsible-menu-item">Remediation</a>
-        <a href="#lessons-learned" class="collapsible-menu-item">Lessons Learned</a>
-        <a href="#future-recommendations" class="collapsible-menu-item">Recommendations</a>
+        <a href="#lessons-learned" class="collapsible-menu-item">Lessons</a>
+        <a href="#future-recommendations" class="collapsible-menu-item">Next Steps</a>
         <a href="#project-references" class="collapsible-menu-item">References</a>
         <a href="#conclusion" class="collapsible-menu-item">Conclusion</a>
     </nav>
