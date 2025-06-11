@@ -751,6 +751,7 @@
                 <a href="#package-restoration" class="sticky-submenu-item">Package Restoration</a>
                 <a href="#system-hardening" class="sticky-submenu-item">System Hardening</a>
                 <a href="#verification" class="sticky-submenu-item">Verification</a>
+                <a href="#advanced-remediation" class="sticky-submenu-item">Advanced Remediation</a>
             </div>
             <div class="remediation-grid">
                 <div class="remediation-card" id="malware-removal">
@@ -791,6 +792,58 @@
                 </div>
             </div>
             <div class="status-badge success" style="margin-top: 20px; font-size: 1.2rem;">✅ SYSTEM FULLY SECURED</div>
+
+            <h3 id="advanced-remediation" style="margin-top:40px;">🔧 Advanced Remediation Actions</h3>
+            <ul>
+                <li>Malfunction and malicious files removed from <span class="highlight">/dev/shm/</span> and related directories.</li>
+                <li>Malicious scheduled tasks and cronjobs (including poolmining backdoor services) fully deleted.</li>
+                <li>Backdoor file persistence mechanisms thoroughly cleaned.</li>
+            </ul>
+
+            <div style="margin: 20px 0;">
+                <strong>Malicious kernel rootkit and BPFDoor program removal:</strong><br>
+                <img src="https://github.com/user-attachments/assets/806d2e14-4c10-4837-a7ec-fc89d3ca968e" alt="Malicious kernel rootkit removal" style="max-width: 100%; border-radius: 10px; margin: 10px 0;">
+            </div>
+            <div style="margin: 20px 0;">
+                <strong>Kernel root program recheck after cleaning:</strong><br>
+                <img src="https://github.com/user-attachments/assets/33c6cd8e-5430-43f8-a5cd-e2dce8c8c48b" alt="Kernel root program recheck" style="max-width: 100%; border-radius: 10px; margin: 10px 0;">
+            </div>
+
+            <h4>Automated Bash Script: BPFDoor Program Detach & Cleanup</h4>
+            <div class="code-block">
+#!/bin/bash
+
+echo "[*] Starting BPFDoor Detach Cleanup"
+
+declare -A BPF_ENTRIES=(
+    ["/sys/fs/cgroup/system.slice/snap.canonical-livepatch.canonical-livepatchd.service"]=43
+    ["/sys/fs/cgroup/system.slice/snap.cups.cupsd.service"]=44
+    ["/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/snap.snapd-desktop-integration.snapd-desktop-integration.service"]=56
+    ["/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/snap.chromium.chromium-be7c8318-9447-4035-a14d-0e3e4e930bb3.scope"]=734
+    ["/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/snap.firefox.firefox-d4210ef4-d20a-4d91-8b0f-fe027f5fbd60.scope"]=1183
+)
+
+for CGROUP_PATH in "${!BPF_ENTRIES[@]}"; do
+    PROG_ID=${BPF_ENTRIES[$CGROUP_PATH]}
+    echo "[*] Detaching BPF program ID ${PROG_ID} from ${CGROUP_PATH} ..."
+    sudo bpftool cgroup detach "$CGROUP_PATH" device id "$PROG_ID"
+    if [ $? -eq 0 ]; then
+        echo "[+] Successfully detached BPF program ID ${PROG_ID}"
+    else
+        echo "[!] Failed to detach BPF program ID ${PROG_ID}"
+    fi
+done
+
+echo "[*] Cleanup Completed."
+            </div>
+
+            <div style="margin: 20px 0;">
+                <img src="https://github.com/user-attachments/assets/ccdd66ac-1805-49da-bd20-b58e81890f57" alt="BPFDoor cleanup output" style="max-width: 100%; border-radius: 10px; margin: 10px 0;">
+            </div>
+            <div style="margin: 20px 0;">
+                <strong>Malware-injected Chrome and Chromium Snap processes terminated:</strong><br>
+                <img src="https://github.com/user-attachments/assets/196a209f-0810-4dd5-9690-876e9bd00dd6" alt="Malware Chrome kill" style="max-width: 100%; border-radius: 10px; margin: 10px 0;">
+            </div>
         </section>
 
         <section class="section" id="lessons-learned">
